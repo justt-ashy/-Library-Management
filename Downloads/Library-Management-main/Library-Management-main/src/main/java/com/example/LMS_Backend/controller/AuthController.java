@@ -3,13 +3,9 @@ package com.example.LMS_Backend.controller;
 import com.example.LMS_Backend.model.User;
 import com.example.LMS_Backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import com.example.LMS_Backend.security.JwtUtil;
 
 @RestController
 @RequestMapping("/auth")
@@ -19,10 +15,7 @@ public class AuthController {
     private UserService userService;
 
     @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private JwtUtil jwtUtil;
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/signup")
     public ResponseEntity<User> signup(@RequestBody User user) {
@@ -36,21 +29,22 @@ public class AuthController {
     }
 
     public static class LoginResponse {
-        public String token;
-        public LoginResponse(String token) { this.token = token; }
+        public String message;
+        public String username;
+        public String role;
+        public LoginResponse(String message, String username, String role) {
+            this.message = message;
+            this.username = username;
+            this.role = role;
+        }
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-        try {
-            Authentication auth = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.username, request.password)
-            );
-            String token = jwtUtil.generateToken(auth.getName(), java.util.Map.of());
-            return ResponseEntity.ok(new LoginResponse(token));
-        } catch (AuthenticationException ex) {
-            return ResponseEntity.status(401).build();
-        }
+        return userService.getUserByUsername(request.username)
+                .filter(u -> passwordEncoder.matches(request.password, u.getPassword()))
+                .map(u -> ResponseEntity.ok(new LoginResponse("LOGIN_SUCCESS", u.getUsername(), u.getRole())))
+                .orElse(ResponseEntity.status(401).build());
     }
 }
 

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/book")
+@RequestMapping({"/books", "/book"})
 public class BookController {
 
     @Autowired
@@ -32,8 +32,8 @@ public class BookController {
 
     // ✅ Add a new book
     @PostMapping
-    public Book addBook(@RequestBody Book book) {
-        return bookService.addNew(book);
+    public ResponseEntity<Book> addBook(@RequestBody Book book) {
+        return ResponseEntity.ok(bookService.addNew(book));
     }
 
     // ✅ Update an existing book
@@ -68,4 +68,5 @@ public class BookController {
             return ResponseEntity.notFound().build();
         }
     }
+
 }

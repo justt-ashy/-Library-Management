@@ -12,7 +12,7 @@
     </parent>
 
     <groupId>com.spark.lms</groupId>
-    <artifactId>lms-backend</artifactId>
+    <artifactId>Library-Management</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>LMS-Backend</name>
     <description>Backend API for Library Management System</description>

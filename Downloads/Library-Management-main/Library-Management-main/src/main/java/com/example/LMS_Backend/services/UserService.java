@@ -38,4 +38,33 @@ public class UserService {
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
+
+    public Optional<User> updateById(Long id, User updated) {
+        return userRepository.findById(id).map(existing -> {
+            if (updated.getUsername() != null) {
+                existing.setUsername(updated.getUsername());
+            }
+            if (updated.getPassword() != null && !updated.getPassword().isBlank()) {
+                existing.setPassword(passwordEncoder.encode(updated.getPassword()));
+            }
+            if (updated.getRole() != null) {
+                existing.setRole(updated.getRole());
+            }
+            if (updated.getDisplayName() != null) {
+                existing.setDisplayName(updated.getDisplayName());
+            }
+            if (updated.getActive() != null) {
+                existing.setActive(updated.getActive());
+            }
+            return userRepository.save(existing);
+        });
+    }
+
+    public boolean deleteByIdIfExists(Long id) {
+        if (!userRepository.existsById(id)) {
+            return false;
+        }
+        userRepository.deleteById(id);
+        return true;
+    }
 }
